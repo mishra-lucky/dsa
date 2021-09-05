@@ -6,42 +6,59 @@ using System.Threading.Tasks;
 
 namespace LISRecursive
 {
+    class Pair
+    {
+        public Pair(int index, int prev)
+        {
+            this.index = index;
+            this.prev = prev;
+        }
+
+        public int index { get; set; }
+        public int prev { get; set; }
+    }
     class Program
     {
-        public static int LIS(int[]arr)
-        {
-            int last = int.MinValue;
-            int[] dp = Enumerable.Repeat(-1, arr.Length).ToArray();
-            arr[0] = 1;
-            int l = _lis(arr,0, arr.Length -1, ref last, ref dp);
-            return l;
-        }
-        public static int _lis(int[] arr, int i, int n, ref int last , ref int[] dp)
-        {
-            if (i == n)
-            {
-                return 0;
-            }
+        public static Dictionary<Pair, int> dp = new Dictionary<Pair, int>();
 
-            if (dp[i] != -1)
-                return dp[i];
-            int include=0, exulde = 0;
-            if (arr[i] > last)
-            {
-                last = arr[i];
-                include =  1 + _lis(arr, i +1, n, ref last, ref dp);
-
-            }
-            exulde =  _lis(arr, i+1, n, ref last, ref dp);
-
-            return dp[i] = Math.Max(include, exulde);
-
-        }
         static void Main(string[] args)
         {
-            int l = LIS(new int[] {4, 6, 8, 10, 3, 2, 11, 15, 13, 12 });
-            Console.WriteLine(l);
+            int[] arr = { 11, 6, 8, 3, 2, 1, 6, 9, 12, 14, 15, 18 };
+            int n = Lis(arr, 0, int.MinValue);
+
+            var k = dp.First(x => x.Value == n).Key;
+            int[] actLis = getSubarr(arr, k.index, n);
+            Console.WriteLine(n);
             Console.ReadLine();
         }
-    }
+
+        private static int[] getSubarr(int[] arr, int index, int n)
+        {
+            int[] res = new int[n];
+            for(int i=0; i < n; i++)
+            {
+                res[i] = arr[index + i];
+            }
+            return res;
+        }
+
+        private static int Lis(int[] arr, int i, int prev)
+        {
+            if (i == arr.Length)
+                return 0;
+            Pair key = new Pair(i, prev);
+            if (dp.ContainsKey(key)) return dp[key];
+
+            int exclude = Lis(arr, i + 1, prev);
+            int include = 0;
+            if (arr[i] > prev)
+            {
+                include = 1 + Lis(arr, i + 1, arr[i]);
+            }
+
+            int val = Math.Max(include, exclude);
+            dp.Add(key, val);
+            return val;
+        }
+	}
 }
